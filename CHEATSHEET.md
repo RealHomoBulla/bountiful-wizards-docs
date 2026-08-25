@@ -43,6 +43,21 @@ python tools/price_engine_2026_08_01.py --explain irons_spellbooks:upgrade_orb
 python tools/paths.py
 ```
 
+## Доки в гит — чтобы читать их с телефона или через сайт ChatGPT
+
+```bash
+cd bountiful_wizards_REMAKE
+python tools/sync_owner_docs_repo.py --remote RealHomoBulla/bountiful-wizards-docs --dry-run
+python tools/sync_owner_docs_repo.py --remote RealHomoBulla/bountiful-wizards-docs
+```
+
+Зеркалит 18 русских страниц из корня `claudework/` в отдельный репозиторий
+[`bountiful-wizards-docs`](https://github.com/RealHomoBulla/bountiful-wizards-docs) и генерирует
+`ОГЛАВЛЕНИЕ.md`. **Читать — там, править — здесь:** следующий синк затирает всё, что правили в
+зеркале, а страница, которой не стало в `claudework/`, исчезает и там.
+⚠️ Репозиторий **приватный**. Плоское чтение по ссылке (в том числе большинством веб-инструментов)
+работает только на публичном; приватный читается через подключённый GitHub-коннектор.
+
 ## Ноут: синк клиента и репозитория
 
 ```bash
