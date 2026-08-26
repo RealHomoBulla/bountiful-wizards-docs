@@ -1,5 +1,11 @@
 # Before this pack goes public
 
+> 🔑 **Все команды на этой странице запускаются из `bountiful_wizards_REMAKE`, а не из корня
+> репозитория.** В корне папки `tools/` нет. Проверка одной строкой: `python tools/paths.py` —
+> если отработала, ты в правильной папке. Добавлено чекапом 25.08: здесь стояли короткие
+> `python tools/…` без указания папки, и на этой странице это опаснее всего — её открывают в момент
+> передачи, когда никто не смотрит.
+
 Opened 2026-08-03, during the config pass. Things that are harmless on the author's own machine and
 wrong the moment somebody else installs the pack. Nothing here is urgent for private play, which is
 exactly why it needs a list — none of it will announce itself.
