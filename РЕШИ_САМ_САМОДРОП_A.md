@@ -44,10 +44,10 @@
 
 | блок | что это | как добывается | твоя оценка |
 |---|---|---|---|
-| `bygonenether:withered_quartz_block` | иссушённый кварцевый блок | слой в Незере, кодовая генерация | |
-| `bygonenether:withered_coal_block` | иссушённый угольный блок | тот же слой | |
-| `bygonenether:withered_basalt` | иссушённый базальт | тот же слой | |
-| `bygonenether:withered_blackstone` | иссушённый чернокамень | тот же слой | |
+| `bygonenether:withered_quartz_block` | иссушённый кварцевый блок | только в структурах катакомб (`bygonenether:catacomb`), не слой | |
+| `bygonenether:withered_coal_block` | иссушённый угольный блок | там же | |
+| `bygonenether:withered_basalt` | иссушённый базальт | там же | |
+| `bygonenether:withered_blackstone` | иссушённый чернокамень | там же | |
 
 ⚠️ По `withered_quartz_block` есть отдельная заметка в наших записях: он уже всплывал как строка
 с подозрительно высокой ценой (129 в прежнем разборе).
@@ -105,11 +105,14 @@ JSON-фича, а наш индекс читает только JSON. Для р�
 ```
 /execute in minecraft:the_nether run tp @s 0 60 0
 /locate structure bygonenether:catacomb
-/locate structure bygonenether:citadel
 /tp @s <x> <y> <z>
 ```
-Иссушённые блоки лежат в этих постройках; отдельный слой породы кладётся «кляксами» по незерраку
-(`netherrack_replace_blobs`, радиус 3–7).
+Иссушённые блоки лежат **только в катакомбах** (`bygonenether:catacomb`): распаковка всех 30
+шаблонов `structures/**/*.nbt` из `bygonenether-1.3.2-1.20.x.jar` находит `withered_*` в 23 файлах,
+и все 23 — в `structures/catacomb/` (включая рёбра `left_rib`/`right_rib`); в пяти шаблонах цитадели
+и двух `piglin_manor` — ноль. Цитадель их не содержит. Единственная в джарнике фича
+`netherrack_replace_blobs` — `soul_stone_blobs` (`bygonenether:soul_stone`, радиус 3–7): она кладёт
+камень душ, а не иссушённые блоки.
 
 ### BetterNether (1 блок)
 
