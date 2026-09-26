@@ -1,4 +1,4 @@
-# Before this pack goes public
+# Перед тем как пакет станет публичным
 
 > 🔑 **Все команды на этой странице запускаются из `bountiful_wizards_REMAKE`, а не из корня
 > репозитория.** В корне папки `tools/` нет. Проверка одной строкой: `python tools/paths.py` —
@@ -6,148 +6,154 @@
 > `python tools/…` без указания папки, и на этой странице это опаснее всего — её открывают в момент
 > передачи, когда никто не смотрит.
 
-Opened 2026-08-03, during the config pass. Things that are harmless on the author's own machine and
-wrong the moment somebody else installs the pack. Nothing here is urgent for private play, which is
-exactly why it needs a list — none of it will announce itself.
+Открыт 2026-08-03, во время прохода по конфигам. То, что на машине автора безобидно и сразу
+становится неверным, как только пакет ставит кто-то другой. Для игры в одиночку здесь ничего
+срочного — именно поэтому нужен список: само оно не объявится.
 
-## ▶️ Run this first — most of section 1 is now a command
+## ▶️ Сначала это — большая часть раздела 1 стала одной командой
 
 ```
-python tools/prepare_release.py            # report only
-python tools/prepare_release.py --apply    # clear what is unambiguously personal residue
-python tools/audit_config_drift.py  # after client + mirror are current
+python tools/prepare_release.py            # только отчёт
+python tools/prepare_release.py --apply    # вычистить однозначно личный мусор
+python tools/audit_config_drift.py  # после того как клиент и зеркало актуальны
 ```
 
-The config audit is a release gate as well as a sync check: it verifies the curated master config
-set against the client and `server_mirror/`, and ensures each intentionally carried config is named
-in `reference/tuned_config_manifest.json`. Its detailed UTF-8 report is
-`bountiful_wizards_REMAKE/reference/_config_drift_report.md`; a missing copy fails loudly.
+Аудит конфигов — это не только проверка синхронизации, но и гейт релиза: он сверяет
+выверенный набор конфигов мастера с клиентом и `server_mirror/` и проверяет, что каждый
+конфиг, который несут намеренно, назван в `reference/tuned_config_manifest.json`. Подробный
+отчёт в UTF-8 — `bountiful_wizards_REMAKE/reference/_config_drift_report.md`; отсутствующая
+копия валит проверку громко.
 
-Added 2026-08-06, because a checklist was the wrong shape for this: **several entries grow back**.
-`config/inventoryprofilesnext/` was swept clean on 2026-08-04 and by 08-06 already carried a public
-routable IPv6 address again — the folder is recreated on every server join. And `oculus.properties`
-is rewritten by the client on exit, so `enableShaders` is true again the moment you play. A one-off
-tidy cannot hold either; a step in the packaging routine can.
+Добавлено 2026-08-06, потому что для этого чеклист — не та форма: **несколько пунктов вырастают
+обратно.** `config/inventoryprofilesnext/` вычистили 2026-08-04, а к 08-06 там снова был
+публичный маршрутизируемый IPv6 — папка пересоздаётся при каждом заходе на сервер. А
+`oculus.properties` клиент переписывает на выходе, так что `enableShaders` снова становится
+true, как только ты играешь. Разовая уборка не удержит ни то, ни другое; удержит шаг в процедуре
+сборки.
 
-It clears personal ids by **blanking** them, so each install regenerates its own rather than
-inheriting a different arbitrary value. Judgement calls — heap, the Forge-owned early window, the
-deliberate `betterfpsdist` tune, machine-tuned shader profiles — are reported and never touched.
-The boxes below stay: they are the record of *why* each item is on the list.
+Личные id вычищаются **обнулением**, чтобы каждая установка получила свой, а не унаследовала
+чужое произвольное значение. Решения, которые требуют judgement — heap, окно Forge, осознанная
+настройка `betterfpsdist`, подстроенные под машину шейдерные профили, — только репортаются и
+никогда не трогаются. Галочки ниже остаются: они и есть запись **почему** пункт в списке.
 
-## 1. Personal machine state that would ship with the pack
+## 1. Личное состояние машины, которое уехало бы вместе с пакетом
 
-- [ ] **`cubes_without_borders.json` — `preferredMonitor = "0,0,3840,2160"`.** That is this machine's
-      4K monitor. Every player would get those coordinates as their default. Reset before packaging.
+- [ ] **`cubes_without_borders.json` — `preferredMonitor = "0,0,3840,2160"`.** Это 4K-монитор этой
+      машины. Каждый игрок получил бы эти координаты по умолчанию. Сбросить перед сборкой.
 - [ ] **`cyclopscore-common.toml` — `anonymousAnalyticsID = "6897330b-49d0-4ed0-806a-a257c91d2605"`
-      with `analytics = true`.** The id is *yours*. Shipped as-is, every player's telemetry reports
-      under one identifier. Either clear the id so each install generates its own, or set
-      `analytics = false`.
-- [ ] **`betterfpsdist.json` — `verticalScaling = 0.5`** against a default of 2.0. A deliberate and
-      good tune for this machine, but it is a *client* render decision; decide whether the pack
-      should impose it on everyone or ship the default.
-- [ ] **`config/CSC/config.toml` — `UUID = "332eca2e-107e-458d-a51c-87bef74ef406"`.** A per-install
-      identifier for the schematic checker, and `[online] UpdateInfo = true` means it talks to the
-      CSC service. Blank the UUID before packaging so each install generates its own.
-- [ ] Sweep the rest of `config/` for absolute paths, monitor geometry, personal ids and Patreon or
-      account tokens. `xaeropatreon.txt` was already deleted as an orphan; check for siblings —
-      three have turned up already (monitor, cyclopscore analytics, CSC UUID).
-- [ ] **Scrub Ponderer's temporary AI authoring state.** Before packaging — and immediately after
-      any supervised AI-assisted Ponder scene session — verify the client
-      `config/ponderer-client.toml` is back at `configSource = "custom"`, `apiKey = ""`,
-      `proxy = ""`, and `trustAllSsl = false`. Do not ship or commit copied Codex/Claude auth,
-      tokens, proxy credentials, generated credential caches, or a `codex`/`claude_code` source.
-      The finished Ponder scenes may ship; the authoring credentials and transport state may not.
+      при `analytics = true`.** Id — твой. Если отправить как есть, вся телеметрия игроков будет
+      приходить под одним идентификатором. Либо обнулить id, чтобы каждая установка получила
+      свой, либо поставить `analytics = false`.
+- [ ] **`betterfpsdist.json` — `verticalScaling = 0.5`** против дефолта 2.0. Для этой машины
+      осознанный и хороший тюнинг, но это решение по рендеру на **клиенте**; реши, должен ли пакет
+      навязывать его всем или отгружать дефолт.
+- [ ] **`config/CSC/config.toml` — `UUID = "332eca2e-107e-458d-a51c-87bef74ef406"`.** Это
+      идентификатор установки для проверки схем, а `[online] UpdateInfo = true` значит, что мод
+      ходит в службу CSC. Обнулить UUID перед сборкой, чтобы каждая установка получила свой.
+- [ ] Прочесать остальной `config/` на абсолютные пути, геометрию монитора, личные id и токены
+      Patreon или аккаунта. `xaeropatreon.txt` уже удалён как сирота; проверь родственников —
+      трое уже нашлись (монитор, аналитика cyclopscore, UUID CSC).
+- [ ] **Вычистить временное состояние авторинга ИИ у Ponderer.** Перед сборкой — и сразу после
+      любой сессии над сценой Ponder с ИИ под присмотром — проверь, что клиентный
+      `config/ponderer-client.toml` вернулся к `configSource = "custom"`, `apiKey = ""`,
+      `proxy = ""`, `trustAllSsl = false`. Не отгружать и не коммитить скопированные авторизации
+      Codex/Claude, токены, учётные данные прокси, сгенерированные кэши креденшелов и source
+      `codex`/`claude_code`. Готовые сцены Ponder отгружать можно; авторизации авторинга и
+      состояние транспорта — нельзя.
 
-## 2. The world is generated here; a public release starts fresh
+## 2. Мир генерируется здесь; публичный релиз начинается с нуля
 
-Worldgen settings only touch chunks generated after the change, so every one of these is inert in
-the current save and fully live in a new one.
+Настройки ворлдгена трогают только чанки, созданные после изменения, поэтому в текущем мире всё
+это не работает, а в новом — работает полностью.
 
-- [ ] **BetterNether's four ruby ore features are off** (2026-08-03). In a fresh world that is the
-      whole point: ruby drops from ~73 a chunk to ~4.5. Confirm it reads correctly on a new seed.
-- [ ] **`betterdungeons`: Small Nether Dungeons are on, spawner skull and rod drops off.** Content
-      without the wither-skull-to-nether-star channel. Only a fresh world will show it.
-- [ ] The blockswap rule `betternether:nether_ruby_ore -> minecraft:netherrack` exists to clean the
-      *existing* world. On a fresh release it does nothing and could be dropped from the shipped
-      config — decide which.
-- [ ] Apotheosis worldgen is whitelisted to the overworld. Rogue spawners and boss dungeons do not
-      generate in the Nether or the End; the bosses themselves do. Deliberate or not, decide it
-      before release rather than after.
+- [ ] **Четыре фичи рубиновой руды BetterNether выключены** (2026-08-03). В свежем мире это и есть
+      смысл: рубин падает с ~73 за чанк до ~4.5. Проверь на новом сиде, что читается правильно.
+- [ ] **`betterdungeons`: малые данжи в Нижнем мире включены, дроп черепов и жезлов из спавнеров
+      выключен.** Контент без канала «череп вилджера → звезда Нижнего мира». Видно это только в
+      свежем мире.
+- [ ] Правило blockswap `betternether:nether_ruby_ore -> minecraft:netherrack` существует, чтобы
+      почистить *текущий* мир. В свежем релизе оно не делает ничего, и его можно убрать из
+      отгружаемого конфига — реши, как.
+- [ ] Ворлдген Apotheosis ограничен белым списком на Оверворлд. Rogue-спавнеры и данжи боссов не
+      генерируются в Нижнем мире и в Энде; сами боссы — генерируются. Сознательно или нет, реши
+      до релиза, а не после.
 
-## 3. Things that only bite other people
+## 3. То, что кусает только других
 
-- [ ] **Carry On's blacklist** gained `ae2:*`, `sophisticatedstorage:*`, `sophisticatedbackpacks:*`
-      and `numismatics:*` on 2026-08-03. On a private world a carried drive bay is your own problem;
-      on a public server it is a dupe and grief surface. Re-check the list against whatever mods are
-      added between now and release.
-- [ ] **Spawner silk needs Silk Touch III** and **the Wandering Trader is blocked through InControl**
-      — both worth a line in the pack description, because both differ from what players expect.
-- [ ] **Confirm CSC's NBT whitelist does what it says.** It was rebuilt on 2026-08-03 from 14 stock
-      entries to 73 — every installed Create, AE2 and Immersive Engineering mod. Copy an addon block
-      with settings via schematic and check the settings survive; then copy something outside the
-      list and check its NBT is still stripped. Both halves matter: the first is the feature, the
-      second is the protection.
-- [ ] Decide whether `itemsHidingJeiRei` actually works behind the EMI/TooManyRecipeViewers shim.
-      If it does nothing, take it back out rather than shipping a setting that lies.
+- [ ] **В blacklist Carry On** 2026-08-03 добавились `ae2:*`, `sophisticatedstorage:*`,
+      `sophisticatedbackpacks:*` и `numismatics:*`. На своём мире переносимый отсек для дисков —
+      твоя проблема; на публичном сервере это лаз для дюпа и грифа. Сверь список с тем, что
+      добавится между сейчас и релизом.
+- [ ] **Шёлк из спавнера требует Silk Touch III**, а **Бродячий Торговец заблокирован через
+      InControl** — оба пункта стоят строки в описании пака, потому что оба отличаются от того,
+      чего ждут игроки.
+- [ ] **Проверь, что whitelist NBT у CSC делает то, что заявлено.** Его пересобрали 2026-08-03
+      с 14 стандартных записей до 73 — по каждому установленному моду Create, AE2 и Immersive
+      Engineering. Скопируй аддон-блок с настройками через схему и проверь, что настройки
+      пережили копирование; потом скопируй что-то вне списка и проверь, что его NBT всё ещё
+      снимается. Важны обе половины: первая — это фича, вторая — защита.
+- [ ] Реши, работает ли `itemsHidingJeiRei` вообще за шимом EMI/TooManyRecipeViewers. Если он
+      ничего не делает, лучше вынуть, чем отгружать настройку, которая врёт.
 
-## 4. Hygiene
+## 4. Гигиена
 
-- [ ] **Orphaned configs.** 21 deleted on 2026-08-03; `tools/audit_orphan_configs_2026_08_03.py`
-      reports what is left, including a "mentioned by name only" tier that needs a human. Re-run
-      before packaging — every mod removal leaves more.
-- [ ] **Path policy is closed — verify it, do not quote it.** `tools/` no longer carries this
-      machine's hardcoded paths; everything resolves through `tools/paths.py`. Re-run the current path
-      audit before shipping instead of trusting any number written on this page.
-- [ ] Run the current in-game checklist (`ИГРОВОЙ_ЧЕКЛИСТ.md`) on a **fresh world**, not just
-      the live save. Several items behave differently on first generation.
+- [ ] **Сиротские конфиги.** 21 удалён 2026-08-03; `tools/audit_orphan_configs_2026_08_03.py`
+      показывает, что осталось, включая слой «упомянут только по имени», который требует
+      человека. Прогнать перед сборкой — каждое удаление мода оставляет новые.
+- [ ] **Политика путей закрыта — проверяй, не цитируй.** В `tools/` больше нет жёстко вписанных
+      путей этой машины; всё резолвится через `tools/paths.py`. Перед отгрузкой прогони текущий
+      аудит путей вместо того, чтобы верить любой цифре, написанной на этой странице.
+- [ ] Прогнать текущий игровой чеклист (`ИГРОВОЙ_ЧЕКЛИСТ.md`) на **свежем мире**, а не только на
+      живом. Несколько пунктов ведут себя иначе при первой генерации.
 
-- [ ] **`integrated_villages-forge-1_20.toml` → `"Activate Create Contraptions"`** (found 2026-08-04).
-      Stock `true`, and the mod's own comment says turning it off "could prevent some lag". It fires
-      **during world generation**, so the cost lands on whoever generates the world, on their
-      machine. Same class as `chunk_builder_threads = 16`: fine here, a question for a player on four
-      cores. Decide before shipping; it changes nothing for chunks that already exist.
+- [ ] **`integrated_villages-forge-1_20.toml` → `"Activate Create Contraptions"`** (найдено
+      2026-08-04). Стоковое `true`, и собственный комментарий мода говорит, что выключение «может
+      предотвратить часть лага». Работает это **во время генерации мира**, так что платит тот, кто
+      генерирует мир, на своей машине. Тот же класс, что `chunk_builder_threads = 16`: здесь
+      нормально, для игрока на четырёх ядрах — вопрос. Решить до отгрузки; на уже созданные чанки
+      это не влияет.
 
-- [ ] **`config/inventoryprofilesnext/` carries per-server folders** (found 2026-08-04): `New World`,
-      `Engineers_and_Wizards`, `test`, a link-local IPv6 address with a port, and
-      `resources-establishing.gl.joinmc.link` — another server's hostname. Four of the five are empty
-      and `enable_lock_slots_per_server` is `false`, so the mod uses none of them. Strip them before
-      packaging; they regenerate. Same class as the other personal ids on this list.
-
----
-
-## Done 2026-08-04 — three release items closed, one caveat
-
-- [x] **`fml.toml` early window** — was **1920×1080** on the server and **1536×960** on the client,
-      i.e. two different people's screens. Both set to Forge's own default **854×480**
-      (`FMLConfig$ConfigValue`, `sipush 854 / sipush 480`). ⚠️ **Re-check at packaging time:** this
-      file is written by Forge itself and is genuinely machine-local, which is exactly why master
-      does **not** own it — forcing one machine's geometry onto the other is the bug, not the fix.
-- [x] **`embeddium-options.json` `chunk_builder_threads` 16 → 0 (auto).** 16 was pinned to a
-      24-thread machine and would have landed on players with four cores. `0` means auto.
-      `use_block_face_culling` was restored to the jar default `true` in the same edit — free
-      culling that had been turned off. `use_quad_normals_for_shading` left at `true` on the user's
-      call: shader taste, and problems there will be reported rather than guessed at.
-- [x] **`config/inventoryprofilesnext/` per-server folders stripped** — and there were more on the
-      client than the server showed: `127.0.0.1`, `localhost`, four IPv6 addresses including a
-      **public routable one** (`2a05:…`), and two `*.gl.joinmc.link` hostnames. All were **empty**,
-      and `enable_lock_slots_per_server` is `false`, so the mod used none of them. `New World/` and
-      `integrationHints/` kept — they hold real files.
-
+- [ ] **`config/inventoryprofilesnext/` тащит папки по серверам** (найдено 2026-08-04): `New World`,
+      `Engineers_and_Wizards`, `test`, link-local IPv6-адрес с портом и
+      `resources-establishing.gl.joinmc.link` — имя чужого сервера. Четыре из пяти пустые, и
+      `enable_lock_slots_per_server` = `false`, так что мод не использует ни одной. Вычистить
+      перед сборкой; они пересоздаются. Тот же класс, что остальные личные id в этом списке.
 
 ---
 
-## Added 2026-08-04 — ship with shaders off, and pointed at a pack that exists
+## Закрыто 2026-08-04 — три пункта релиза закрыты, одна оговорка
 
-- [ ] **`config/oculus.properties`: `enableShaders=false` and `shaderPack=` naming an installed
-      folder.** It read `ComplementaryUnbound_r5.7.1 + EuphoriaPatches_1.8.6` — a name that is **not
-      on disk any more**; the 5.7.1 folders were renamed `Outdated …` when 5.8.1 went in. So the
-      selection pointed at nothing and turning shaders on would have found no pack. Set to
-      **`ComplementaryUnbound_r5.8.1 + EuphoriaPatches_1.9.3`**, shaders still **off**.
-      ⚠️ **This file is rewritten by the client on exit.** The user turns shaders on to play, so by
-      packaging time it will say `enableShaders=true` again — set it back to `false` at packaging,
-      and check the pack name still matches a folder in `shaderpacks/`.
-- [ ] **Heap numbers are machine-local — do not ship the laptop's.** `user_jvm_args.txt` and
-      `variables.txt` are now **`-Xmx6G -Xms6G`**, which is right for a 15.6 GB laptop that runs the
-      client and the server at once, and wrong for a dedicated box. The desktop has 32 GB and can
-      keep 10G. Decide what the released server pack should carry rather than shipping whichever
-      machine last touched it.
+- [x] **Раннее окно в `fml.toml`** — было **1920×1080** на сервере и **1536×960** на клиенте, то
+      есть экраны двух разных людей. Оба поставлены на собственный дефолт Forge — **854×480**
+      (`FMLConfig$ConfigValue`, `sipush 854 / sipush 480`). ⚠️ **Перепроверить на момент сборки:**
+      этот файл пишет сам Forge и он по-настоящему машинный — ровно поэтому мастер им **не**
+      владеет; насильниковать геометрию одной машины на другую и есть ошибка, а не решение.
+- [x] **`embeddium-options.json`, `chunk_builder_threads` 16 → 0 (авто).** 16 было закреплено под
+      машину на 24 потока и легло бы игрокам на четырёх ядрах. `0` означает авто.
+      `use_block_face_culling` в той же правке вернули к дефолту джарника — `true`, то есть
+      бесплатное отсечение, которое было выключено. `use_quad_normals_for_shading` оставлен в
+      `true` по решению пользователя: вкус шейдеров, проблемы оттуда сообщают, а не угадывают.
+- [x] **`config/inventoryprofilesnext/`, папки по серверам вычищены** — и на клиенте их было
+      больше, чем показывал сервер: `127.0.0.1`, `localhost`, четыре IPv6-адреса, включая один
+      **публичный маршрутизируемый** (`2a05:…`), и два имени `*.gl.joinmc.link`. Все были
+      **пустые**, и `enable_lock_slots_per_server` = `false`, так что мод не использовал ни одного.
+      `New World/` и `integrationHints/` оставлены — в них лежат настоящие файлы.
+
+
+---
+
+## Добавлено 2026-08-04 — отгружать с выключенными шейдерами и с именем, которое есть
+
+- [ ] **`config/oculus.properties`: `enableShaders=false` и `shaderPack=` с именем установленной
+      папки.** Там стояло `ComplementaryUnbound_r5.7.1 + EuphoriaPatches_1.8.6` — имя, которого
+      **больше нет на диске**; папки 5.7.1 переименовали в `Outdated …`, когда пришёл 5.8.1. То
+      есть выбор указывал в никуда, и включение шейдеров не нашло бы пака. Поставить
+      **`ComplementaryUnbound_r5.8.1 + EuphoriaPatches_1.9.3`**, шейдеры всё ещё **выключены**.
+      ⚠️ **Файл переписывается клиентом на выходе.** Пользователь включает шейдеры, чтобы играть,
+      так что к моменту сборки там снова будет `enableShaders=true` — вернуть `false` при сборке и
+      проверить, что имя пака совпадает с папкой в `shaderpacks/`.
+- [ ] **Числа heap машинные — не отгружай ноутбучные.** В `user_jvm_args.txt` и `variables.txt`
+      сейчас **`-Xmx6G -Xms6G`** — это верно для ноутбука на 15.6 ГБ, который тянет клиент и
+      сервер разом, и неверно для отдельной машины. У десктопа 32 ГБ, он держит 10G. Реши, что
+      должен нести релизный серверный пакет, вместо того чтобы отгружать то, к чему последним
+      притронулась машина.
